@@ -17,35 +17,43 @@ import frc.robot.subsystems.drive.SwerveDrive;
 public class RobotContainer {
 
   // Controllers
-  public static final CommandPS5Controller driverController = new CommandPS5Controller(0);
-  public static final CommandPS5Controller operatorController = new CommandPS5Controller(1);
+  public static final CommandPS5Controller m_driverController = new CommandPS5Controller(0);
+  // public static final CommandPS5Controller m_operatorController = new CommandPS5Controller(1);
 
   // Subsystems
-  private SwerveDrive swerveSubsystem = new SwerveDrive();
+  private SwerveDrive m_swerveSubsystem = SwerveDrive.getInstance();
 
   // Autonomous
-  private SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> m_autoChooser;
 
   public RobotContainer() {
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Mode", autoChooser);
+    // m_autoChooser = AutoBuilder.buildAutoChooser();
+    // SmartDashboard.putData("Auto Mode", m_autoChooser);
 
     configureBindings();
   }
 
   private void configureBindings() {
+    m_swerveSubsystem.setJoystickSuppliers(
+      () -> -m_driverController.getLeftY(), 
+      () -> -m_driverController.getLeftX(), 
+      () -> -m_driverController.getRightX()
+    );
     // swerveSubsystem.setDefaultCommand(
-    //   swerveSubsystem.drive(
-    //     () -> driverController.getLeftY(),
-    //     () -> driverController.getLeftX(),
-    //     () -> driverController.getRightX(),
-    //     () -> driverController.getR2() > 0.5,
-    //     () -> driverController.getL2() > 0.5
-    //   )
+    // swerveSubsystem.drive(
+    // () -> driverController.getLeftY(),
+    // () -> driverController.getLeftX(),
+    // () -> driverController.getRightX(),
+    // () -> driverController.getR2() > 0.5,
+    // () -> driverController.getL2() > 0.5
+    // )
     // );
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return new Command() {
+      
+    };
+    // return m_autoChooser.getSelected();
   }
 }
