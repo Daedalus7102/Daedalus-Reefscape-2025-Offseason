@@ -99,7 +99,10 @@ public class SwerveDrive extends SubsystemBase{
         // SwerveModuleState state = new SwerveModuleState(speed * SwerveConstants.kDriveMaxSpeed, angle);
 
         // SmartDashboard.putNumber("Joystick Angle", angle.getDegrees());
-        // SmartDashboard.putNumber("Module Angle", m_swerveModule1.getModuleRotation());
+        // SmartDashboard.putNumber("Module1 Angle", m_swerveModule1.getModuleRotation());
+        // SmartDashboard.putNumber("Module2 Angle", m_swerveModule2.getModuleRotation());
+        // SmartDashboard.putNumber("Module3 Angle", m_swerveModule3.getModuleRotation());
+        // SmartDashboard.putNumber("Module4 Angle", m_swerveModule4.getModuleRotation());
 
         // m_swerveModule4.setDesiredState(state);
         // m_testModule2.setDesiredState(state);

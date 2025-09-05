@@ -41,7 +41,7 @@ public class SwerveModule {
         m_driveMotorConfig
             .smartCurrentLimit(SwerveConstants.kDriveCurrentLimitA)
             .idleMode(SparkMaxConfig.IdleMode.kBrake)
-            .inverted(false)
+            .inverted(isInverted)
             .voltageCompensation(SwerveConstants.kDriveVoltageComp)
             .openLoopRampRate(SwerveConstants.kDriveOpenLoopRamp)
             .closedLoopRampRate(SwerveConstants.kDriveClosedLoopRamp);
@@ -118,6 +118,7 @@ public class SwerveModule {
 
     // Set to Desired State
     public void setDesiredState(SwerveModuleState desired) {
+
         m_moduleState = desired;
         var current = Rotation2d.fromDegrees(m_turnRelativeEncoder.getPosition());
         desired.optimize(current);
@@ -158,7 +159,7 @@ public class SwerveModule {
 
     // Get Module Position (Used for Odometry)
     public SwerveModulePosition getModulePosition() {
-        Rotation2d rotation2d = new Rotation2d(Math.toRadians(m_driveRelativeEncoder.getPosition()));
+        Rotation2d rotation2d = Rotation2d.fromDegrees(m_turnRelativeEncoder.getPosition());
         double position = m_driveRelativeEncoder.getPosition() * SwerveConstants.kWheelCircumference;
         return new SwerveModulePosition(position, rotation2d);
     }

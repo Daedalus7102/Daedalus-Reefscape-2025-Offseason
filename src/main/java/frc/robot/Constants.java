@@ -13,12 +13,12 @@ public class Constants {
         // Module Constants
         public static final double kWheelDiameter = 0.101; // Wheel diameter in meters
         public static final double kWheelCircumference = Math.PI * kWheelDiameter;
-        public static final double kDriveMaxSpeed = 2.0; // Maximum drive speed in meters per second
+        public static final double kDriveMaxSpeed = 4.5; // Maximum drive speed in meters per second
         public static final double kDriveMaxAcc = 0.5; // Maximum drive acceleration in meters per second squared
         public static final double kDriveGearRatio = 6.75; // 5.36;
-        public static final double kTurnMaxSpeed = Math.PI / 2; // Maximum turn speed in radians per second
+        public static final double kTurnMaxSpeed = Math.PI*4; // Maximum turn speed in radians per second
         public static final double kTurnMaxAcc = 0.15; // Maximum turn acceleration in degrees per second squared
-        public static final double kTurnGearRatio = 150 / 7; // 18.75;
+        public static final double kTurnGearRatio = 150d/7d;
         // Drive encoder
         public static final double kDriveVelocityFactor = kWheelCircumference / 60.0; // m/s per RPM
         // Turning encoder
@@ -43,10 +43,11 @@ public class Constants {
         //    | 3 |▩▩▩▩▩▩▩▩▩| 4 |        
         //    '---'         '---'
 
-        public static final SwerveModule kFrontLeft = new SwerveModule(5, 6, 1, -0.452148, true);
-        public static final SwerveModule kFrontRight = new SwerveModule(7, 8, 2, -0.064453, false);
-        public static final SwerveModule kBackLeft = new SwerveModule(9, 10, 3, 0.446533, true);
-        public static final SwerveModule kBackRight = new SwerveModule(11, 12, 4, 0.072998, false);
+        public static final SwerveModule kFrontLeft = new SwerveModule(5, 6, 1, 0.051758, true);
+        public static final SwerveModule kFrontRight = new SwerveModule(7, 8, 2, 0.434570, false);
+        public static final SwerveModule kBackLeft = new SwerveModule(9, 10, 3, -0.047363, true);
+        public static final SwerveModule kBackRight = new SwerveModule(11, 12, 4, 0.065674, true);
+
         // Drive Motor PID Constants
         public static final double kDriveP = 0.06, kDriveI = 0.0, kDriveD = 0.0, kDriveFF = 0.2;
         // Turning Motor PID Constants
