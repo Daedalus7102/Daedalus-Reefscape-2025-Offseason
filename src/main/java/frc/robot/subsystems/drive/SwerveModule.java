@@ -40,7 +40,7 @@ public class SwerveModule {
         m_driveMotorConfig = new SparkMaxConfig();
         m_driveMotorConfig
             .smartCurrentLimit(SwerveConstants.kDriveCurrentLimitA)
-            .idleMode(SparkMaxConfig.IdleMode.kBrake)
+            .idleMode(SparkMaxConfig.IdleMode.kCoast)
             .inverted(isInverted)
             .voltageCompensation(SwerveConstants.kDriveVoltageComp)
             .openLoopRampRate(SwerveConstants.kDriveOpenLoopRamp)
@@ -118,7 +118,6 @@ public class SwerveModule {
 
     // Set to Desired State
     public void setDesiredState(SwerveModuleState desired) {
-
         m_moduleState = desired;
         var current = Rotation2d.fromDegrees(m_turnRelativeEncoder.getPosition());
         desired.optimize(current);
@@ -134,6 +133,7 @@ public class SwerveModule {
             SparkMax.ControlType.kPosition);
     }
 
+    // Optimize Angle to Prevent Over Rotation
     private double optimizeOptimize(double desireAngle, double absoluteAngle){
         double angle = Math.abs(absoluteAngle-desireAngle);
         if(desireAngle < absoluteAngle && angle < 180){ angle = -angle;}else
@@ -142,10 +142,6 @@ public class SwerveModule {
             if(desireAngle > absoluteAngle){ angle = -angle;}
         } 
         return angle;
-    }
-
-    public double getModuleRotation() {
-        return m_turnRelativeEncoder.getPosition();
     }
 
     // Coordinates Encoder Position
