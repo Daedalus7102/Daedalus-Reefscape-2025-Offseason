@@ -118,4 +118,43 @@ public class Constants {
         public static final double kElevatorMinHeight = 0;
         public static final double kElevatorMaxHeight = 130;
     }
+
+    /* ===========================
+                Intake (new)
+       =========================== */
+    public static final class IntakeConstants {
+        // CAN IDs
+        public static final int kPivotMotorID  = 30; // TODO: set actual ID
+        public static final int kRollerMotorID = 31; // TODO: set actual ID
+
+        // Inversions
+        public static final boolean kPivotInverted  = false; // TODO: test, if intake goes down when set positive, invert
+        public static final boolean kRollerInverted = false; // TODO: test, if intake intakes when set positive, invert
+
+        // Current Limits
+        public static final int kPivotCurrentLimitA  = 40; // TODO: 30–60A typical for NEO
+        public static final int kRollerCurrentLimitA = 40; // TODO: 30–60A typical for NEO
+
+        // PID (pivot position hold)
+        // TODO: test and tune these values
+        public static final double kPivotP = 0.1; // if it overshoots, reduce. If it is sluggish or doesnt move, increase.
+        public static final double kPivotI = 0.0; // if it stops before reaching setpoint, increase.
+        public static final double kPivotD = 0.0; // if it oscillates around setpoint, increase.
+        public static final double kPivotFF = 0.0; 
+
+        // Units and soft limits
+        // Position conversion: raw rotations * kPivotPosConversion -> "rotations" for setpoint
+        public static final double kPivotPosConversion = 1.0; // TODO: set to gearbox ratio
+        public static final boolean kUsePivotSoftLimits = true;
+        public static final float kPivotForwardLimitRot = 0.0f;    // stowed side (greater angle)
+        public static final float kPivotReverseLimitRot = -1.5f;   // TODO: adjust floor side (smaller angle)
+
+        // Named setpoints (rotations, after conversion)
+        public static final double kPivotStowRot  = -0.1;  // TODO: test stowed value
+        public static final double kPivotFloorRot = -1.4;  // TODO: test floor value
+
+        // Roller speeds
+        public static final double kRollerInPercent  = 0.85;  // intake force %
+        public static final double kRollerOutPercent = -0.6;  // eject force %
+    }
 }

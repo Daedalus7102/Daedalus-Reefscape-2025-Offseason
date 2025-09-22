@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.Intake;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,11 +21,13 @@ public class RobotContainer {
 
 	// Controllers
 	public static final CommandXboxController m_driverController = new CommandXboxController(0);
-	// public static final CommandPS5Controller m_operatorController = new CommandPS5Controller(1);
+	public static final CommandPS5Controller m_operatorController = new CommandPS5Controller(1); // TODO: Change to Xbox if needed
+	// public static final CommandXboxController m_operatorController = new CommandXboxController(1);
 
 	// Subsystems
 	private SwerveDrive m_swerveSubsystem = SwerveDrive.getInstance();
 	private Elevator m_elevatorSubsystem = Elevator.getInstance();
+	private final Intake m_intakeSubsystem = new Intake();
 
 	// Autonomous
 	private SendableChooser<Command> m_autoChooser;
@@ -32,6 +37,8 @@ public class RobotContainer {
 		m_autoChooser = AutoBuilder.buildAutoChooser();
 		SmartDashboard.putData("Auto Mode", m_autoChooser);
 	}
+
+	// If you read this
 
 	private void configureBindings() {
 		// Driver Controller
@@ -52,6 +59,34 @@ public class RobotContainer {
 				return -Math.round(Math.sin(Math.toRadians(pov)));
 			}
 		);
+
+		// -----------------------------
+		// Operator: Intake bindings
+		// -----------------------------
+
+		// Roller: R1 = intake in, L1 = eject out
+		m_operatorController.R1()
+			.onTrue(m_intakeSubsystem.rollerIn())
+			.onFalse(m_intakeSubsystem.rollerStop());
+
+		m_operatorController.L1()
+			.onTrue(m_intakeSubsystem.rollerOut())
+			.onFalse(m_intakeSubsystem.rollerStop());
+
+		// Pivot manual: POV up/down (hold = jog)
+		m_operatorController.povUp()
+			.onTrue(m_intakeSubsystem.pivotManual(+0.4))
+			.onFalse(m_intakeSubsystem.stop());
+
+		m_operatorController.povDown()
+			.onTrue(m_intakeSubsystem.pivotManual(-0.4))
+			.onFalse(m_intakeSubsystem.stop());
+
+		// Setpoints (tap once)
+		// TODO: check triangle and cross not alredy in use
+		m_operatorController.triangle().onTrue(m_intakeSubsystem.pivotToStow());
+		m_operatorController.cross().onTrue(m_intakeSubsystem.pivotToFloor());
+
 
 		// Operator Controller
 		// m_operatorController.cross()
