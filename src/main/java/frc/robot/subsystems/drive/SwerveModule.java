@@ -80,6 +80,7 @@ public class SwerveModule {
         // Absolute Encoder
         m_offset = turnEncoderOffset;
         m_turnEncoder = new CANcoder(CANcoderID, SwerveConstants.kCANbus);
+        m_turnEncoder.optimizeBusUtilization();
         m_turnEncoderConfig = new CANcoderConfiguration();
         m_turnEncoderConfig
             .MagnetSensor.MagnetOffset = m_offset;

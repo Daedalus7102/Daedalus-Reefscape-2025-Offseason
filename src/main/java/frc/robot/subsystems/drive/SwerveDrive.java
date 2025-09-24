@@ -62,6 +62,8 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveModule m_swerveModule3 = SwerveConstants.kBackLeft;
     private final SwerveModule m_swerveModule4 = SwerveConstants.kBackRight;
 
+    private final SwerveModulePosition[] m_positions = new SwerveModulePosition[4];
+
     private final Pigeon2 m_gyro = new Pigeon2(SwerveConstants.kPigeonID, "rio");
     private SwerveDriveOdometry m_odometry;
     private final SwerveDriveKinematics m_kinematics = SwerveConstants.kKinematics;
@@ -73,17 +75,17 @@ public class SwerveDrive extends SubsystemBase {
     // Control Inputs
     private DoubleSupplier m_translationX = () -> 0.0, m_translationY = () -> 0.0, m_rotationOmega = () -> 0.0;
     private DoubleSupplier m_padX, m_padY;
-    private double m_deadband = 0.3;
+    private double m_deadband = 0d;
     private boolean m_fieldRelativeTeleop = true;
 
     // Constructor
     private SwerveDrive() {
         m_gyro.reset();
-
+        m_gyro.optimizeBusUtilization();
+        
         SmartDashboard.putData("Field", m_field);
         SmartDashboard.putBoolean("FieldRelativeTeleop", m_fieldRelativeTeleop);
         SmartDashboard.putNumber("DeadZone", m_deadband);
-        SmartDashboard.putNumber("Gyro", m_gyro.getRotation2d().getDegrees());
 
         m_odometry = new SwerveDriveOdometry(
                 m_kinematics, m_gyro.getRotation2d(),
@@ -147,8 +149,14 @@ public class SwerveDrive extends SubsystemBase {
                 .collect(Collectors.toList()).isEmpty());
     }
 
-    @Override
-    public void periodic() {
+    public Command zeroGyro() {
+        return Commands.runOnce(
+            () -> m_gyro.reset(),
+            this
+        );
+    }
+
+    public void updateDashboard() {
         boolean FRT = SmartDashboard.getBoolean("FieldRelativeTeleop", true);
         if (FRT != m_fieldRelativeTeleop) {
             m_fieldRelativeTeleop = FRT;
@@ -160,62 +168,74 @@ public class SwerveDrive extends SubsystemBase {
         SmartDashboard.putNumber("Gyro", m_gyro.getRotation2d().getDegrees());
         SmartDashboard.putBoolean("DriverJoystick", isJoystickInputPresent());
         SmartDashboard.putBoolean("DriverDPad", isDPadInputPresent());
+    }
 
-        runState();
+    @Override
+    public void periodic() {
+        updateStateMachine();
 
         m_odometry.update(m_gyro.getRotation2d(), getSwerveModulePositions());
         m_field.setRobotPose(m_odometry.getPoseMeters());
     }
 
-    private void runState() {
-        Command currentDriveCommand = null;
-        if (!m_state.equals(m_lastState) || isJoystickInputPresent() || isDPadInputPresent()) {
+    private Command m_activeCommand = null;
+
+    private void updateStateMachine() {
+        if (m_state != m_lastState) {
             SmartDashboard.putString("SwerveDriveState", m_state.name());
-            switch (m_state) {
-                case JOYSTICKS:
-                    currentDriveCommand = teleopDrive()
-                            .until(() -> !isJoystickInputPresent())
-                            .finallyDo((interrupted) -> {
-                                if (!interrupted)
-                                    setState(SwerveDriveState.IDLE).schedule();
-                            });
-                    break;
-                case D_PAD:
-                    currentDriveCommand = dPadDrive()
-                            .until(() -> !isDPadInputPresent())
-                            .finallyDo((interrupted) -> {
-                                if (!interrupted)
-                                    setState(SwerveDriveState.IDLE).schedule();
-                            });
-                    break;
-                case IDLE:
-                    currentDriveCommand = idleDrive().repeatedly()
-                            .until(() -> isJoystickInputPresent() || isDPadInputPresent())
-                            .finallyDo((interrupted) -> {
-                                if (!interrupted) {
-                                    if (isJoystickInputPresent())
-                                        setState(SwerveDriveState.JOYSTICKS).schedule();
-                                    else if (isDPadInputPresent())
-                                        setState(SwerveDriveState.D_PAD).schedule();
-                                }
-                            });
-                    break;
-                case LOCKED:
-                    break;
-                case ON_THE_FLY:
-                    break;
-                case AUTO:
-                    break;
-                default:
-                    m_state = SwerveDriveState.IDLE;
-                    break;
-            }
 
+            if (m_activeCommand != null) {
+                m_activeCommand.cancel();
+            }
+            m_activeCommand = getCommandForState(m_state);
+
+            if (m_activeCommand != null) {
+                m_activeCommand.schedule();
+            }
             m_lastState = m_state;
+        }
+    }
 
-            if (currentDriveCommand != null) {
-                currentDriveCommand.schedule();
-            }
+    private Command getCommandForState(SwerveDriveState state) {
+        switch (state) {
+            case JOYSTICKS:
+                return teleopDrive().repeatedly()
+                    .until(() -> !isJoystickInputPresent())
+                    .finallyDo(interrupted -> {
+                        if (!interrupted) setState(SwerveDriveState.IDLE).schedule();
+                    });
+
+            case D_PAD:
+                return dPadDrive().repeatedly()
+                    .until(() -> !isDPadInputPresent())
+                    .finallyDo(interrupted -> {
+                        if (!interrupted) setState(SwerveDriveState.IDLE).schedule();
+                    });
+
+            case IDLE:
+                return idleDrive().repeatedly()
+                    .until(() -> isJoystickInputPresent() || isDPadInputPresent())
+                    .finallyDo(interrupted -> {
+                        if (!interrupted) {
+                            if (isJoystickInputPresent())
+                                setState(SwerveDriveState.JOYSTICKS).schedule();
+                            else if (isDPadInputPresent())
+                                setState(SwerveDriveState.D_PAD).schedule();
+                        }
+                    });
+
+            case LOCKED:
+                return null;
+
+            case ON_THE_FLY:
+                return null;
+
+            case AUTO:
+                return null;
+
+            default:
+                m_state = SwerveDriveState.IDLE;
+                return idleDrive();
         }
     }
 
@@ -235,7 +255,7 @@ public class SwerveDrive extends SubsystemBase {
     }
 
     private Command lockedDrive() {
-        return Commands.runOnce(() -> {
+        return new RunCommand(() -> {
             SwerveModuleState[] lockedStates = new SwerveModuleState[4];
 
             lockedStates[0] = new SwerveModuleState(0.0, Rotation2d.fromDegrees(45));
@@ -289,13 +309,11 @@ public class SwerveDrive extends SubsystemBase {
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
-        SwerveModulePosition[] positions = {
-                m_swerveModule1.getModulePosition(),
-                m_swerveModule2.getModulePosition(),
-                m_swerveModule3.getModulePosition(),
-                m_swerveModule4.getModulePosition()
-        };
-        return positions;
+        m_positions[0] = m_swerveModule1.getModulePosition();
+        m_positions[1] = m_swerveModule2.getModulePosition();
+        m_positions[2] = m_swerveModule3.getModulePosition();
+        m_positions[3] = m_swerveModule4.getModulePosition();
+        return m_positions;
     }
 
     private void setSwerveModuleStates(ChassisSpeeds chassisSpeeds) {
