@@ -14,12 +14,12 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
 
-    private final SparkMax m_pivotMotor = new SparkMax(Constants.IntakeConstants.kPivotMotorID, MotorType.kBrushless);
-    private final SparkMax m_rollerMotor = new SparkMax(Constants.IntakeConstants.kRollerMotorID, MotorType.kBrushless);
+    private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorID, MotorType.kBrushless);
+    private final SparkMax m_rollerMotor = new SparkMax(IntakeConstants.kRollerMotorID, MotorType.kBrushless);
 
     private final RelativeEncoder m_pivotEncoder = m_pivotMotor.getEncoder();
     private final SparkClosedLoopController m_pivotPID = m_pivotMotor.getClosedLoopController();
@@ -28,32 +28,30 @@ public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
         // Pivot config
         var pivotCfg = new SparkMaxConfig();
         pivotCfg.idleMode(IdleMode.kBrake);
-        pivotCfg.smartCurrentLimit(Constants.IntakeConstants.kPivotCurrentLimitA);
-        pivotCfg.inverted(Constants.IntakeConstants.kPivotInverted);
+        pivotCfg.smartCurrentLimit(IntakeConstants.kPivotCurrentLimitA);
+        pivotCfg.inverted(IntakeConstants.kPivotInverted);
         pivotCfg.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(Constants.IntakeConstants.kPivotP)
-            .i(Constants.IntakeConstants.kPivotI)
-            .d(Constants.IntakeConstants.kPivotD)
-            .velocityFF(Constants.IntakeConstants.kPivotFF);
-        if (Constants.IntakeConstants.kUsePivotSoftLimits) {
-            pivotCfg.softLimit.forwardSoftLimit(Constants.IntakeConstants.kPivotForwardLimitRot)
+            .p(IntakeConstants.kPivotP)
+            .i(IntakeConstants.kPivotI)
+            .d(IntakeConstants.kPivotD)
+            .velocityFF(IntakeConstants.kPivotFF);
+        if (IntakeConstants.kUsePivotSoftLimits) {
+            pivotCfg.softLimit.forwardSoftLimit(IntakeConstants.kPivotForwardLimitRot)
                     .forwardSoftLimitEnabled(true);
-            pivotCfg.softLimit.reverseSoftLimit(Constants.IntakeConstants.kPivotReverseLimitRot)
+            pivotCfg.softLimit.reverseSoftLimit(IntakeConstants.kPivotReverseLimitRot)
                     .reverseSoftLimitEnabled(true);
         }
         // Set conversion for rotations
-        pivotCfg.encoder.positionConversionFactor(Constants.IntakeConstants.kPivotPosConversion);
+        pivotCfg.encoder.positionConversionFactor(IntakeConstants.kPivotPosConversion);
         m_pivotMotor.configure(pivotCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // Roller config
         var rollerCfg = new SparkMaxConfig();
         rollerCfg.idleMode(IdleMode.kCoast);
-        rollerCfg.smartCurrentLimit(Constants.IntakeConstants.kRollerCurrentLimitA);
-        rollerCfg.inverted(Constants.IntakeConstants.kRollerInverted);
+        rollerCfg.smartCurrentLimit(IntakeConstants.kRollerCurrentLimitA);
+        rollerCfg.inverted(IntakeConstants.kRollerInverted);
         m_rollerMotor.configure(rollerCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        SmartDashboard.putBoolean("Intake/UseSoftLimits", Constants.IntakeConstants.kUsePivotSoftLimits);
     }
 
     // -------- Low-level controls --------
@@ -87,20 +85,20 @@ public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
     }
 
     public Command pivotToStow() {
-        return Commands.run(() -> holdPivotSetpoint(Constants.IntakeConstants.kPivotStowRot), this);
+        return Commands.run(() -> holdPivotSetpoint(IntakeConstants.kPivotStowRot), this);
     }
 
     public Command pivotToFloor() {
-        return Commands.run(() -> holdPivotSetpoint(Constants.IntakeConstants.kPivotFloorRot), this);
+        return Commands.run(() -> holdPivotSetpoint(IntakeConstants.kPivotFloorRot), this);
     }
 
     public Command rollerIn() {
-        return Commands.run(() -> setRollerPercent(Constants.IntakeConstants.kRollerInPercent), this)
+        return Commands.run(() -> setRollerPercent(IntakeConstants.kRollerInPercent), this)
                        .finallyDo(i -> setRollerPercent(0.0));
     }
 
     public Command rollerOut() {
-        return Commands.run(() -> setRollerPercent(Constants.IntakeConstants.kRollerOutPercent), this)
+        return Commands.run(() -> setRollerPercent(IntakeConstants.kRollerOutPercent), this)
                        .finallyDo(i -> setRollerPercent(0.0));
     }
 

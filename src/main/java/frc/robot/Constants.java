@@ -132,8 +132,8 @@ public class Constants {
         public static final boolean kRollerInverted = false; // TODO: test, if intake intakes when set positive, invert
 
         // Current Limits
-        public static final int kPivotCurrentLimitA  = 40; // TODO: 30–60A typical for NEO
-        public static final int kRollerCurrentLimitA = 40; // TODO: 30–60A typical for NEO
+        public static final int kPivotCurrentLimitA  = 40;
+        public static final int kRollerCurrentLimitA = 40;
 
         // PID (pivot position hold)
         // TODO: test and tune these values
