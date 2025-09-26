@@ -17,7 +17,7 @@ import frc.robot.subsystems.drive.SwerveDrive;
 public class RobotContainer {
 
 	// Controllers
-	public static final CommandPS5Controller m_driverController = new CommandPS5Controller(0);
+	public static final CommandXboxController m_driverController = new CommandXboxController(0);
 	// public static final CommandPS5Controller m_operatorController = new CommandPS5Controller(1);
 
 	// Subsystems
@@ -52,7 +52,7 @@ public class RobotContainer {
 				return -Math.round(Math.sin(Math.toRadians(pov)));
 			}
 		);
-		m_driverController.square()
+		m_driverController.x()
 			.toggleOnTrue(m_swerveSubsystem.zeroGyro());
 
 		// Operator Controller

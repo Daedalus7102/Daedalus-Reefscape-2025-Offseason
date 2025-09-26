@@ -172,11 +172,65 @@ public class SwerveDrive extends SubsystemBase {
 
     @Override
     public void periodic() {
-        updateStateMachine();
+        // updateStateMachine();
+        runState();
 
         m_odometry.update(m_gyro.getRotation2d(), getSwerveModulePositions());
         m_field.setRobotPose(m_odometry.getPoseMeters());
     }
+
+    private void runState() {
+        Command currentDriveCommand = null;
+        if (!m_state.equals(m_lastState) || isJoystickInputPresent() || isDPadInputPresent()) {
+            SmartDashboard.putString("SwerveDriveState", m_state.name());
+            switch (m_state) {
+                case JOYSTICKS:
+                    currentDriveCommand = teleopDrive()
+                            .until(() -> !isJoystickInputPresent())
+                            .finallyDo((interrupted) -> {
+                                if (!interrupted)
+                                    setState(SwerveDriveState.IDLE).schedule();
+                            });
+                    break;
+                case D_PAD:
+                    currentDriveCommand = dPadDrive()
+                            .until(() -> !isDPadInputPresent())
+                            .finallyDo((interrupted) -> {
+                                if (!interrupted)
+                                    setState(SwerveDriveState.IDLE).schedule();
+                            });
+                    break;
+                case IDLE:
+                    currentDriveCommand = idleDrive().repeatedly()
+                            .until(() -> isJoystickInputPresent() || isDPadInputPresent())
+                            .finallyDo((interrupted) -> {
+                                if (!interrupted) {
+                                    if (isJoystickInputPresent())
+                                        setState(SwerveDriveState.JOYSTICKS).schedule();
+                                    else if (isDPadInputPresent())
+                                        setState(SwerveDriveState.D_PAD).schedule();
+                                }
+                            });
+                    break;
+                case LOCKED:
+                    break;
+                case ON_THE_FLY:
+                    break;
+                case AUTO:
+                    break;
+                default:
+                    m_state = SwerveDriveState.IDLE;
+                    break;
+            }
+
+            m_lastState = m_state;
+
+            if (currentDriveCommand != null) {
+                currentDriveCommand.schedule();
+            }
+        }
+    }
+
 
     private Command m_activeCommand = null;
 
@@ -199,14 +253,14 @@ public class SwerveDrive extends SubsystemBase {
     private Command getCommandForState(SwerveDriveState state) {
         switch (state) {
             case JOYSTICKS:
-                return teleopDrive().repeatedly()
+                return teleopDrive()
                     .until(() -> !isJoystickInputPresent())
                     .finallyDo(interrupted -> {
                         if (!interrupted) setState(SwerveDriveState.IDLE).schedule();
                     });
 
             case D_PAD:
-                return dPadDrive().repeatedly()
+                return dPadDrive()
                     .until(() -> !isDPadInputPresent())
                     .finallyDo(interrupted -> {
                         if (!interrupted) setState(SwerveDriveState.IDLE).schedule();
