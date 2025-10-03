@@ -332,4 +332,28 @@ public class SwerveDrive extends SubsystemBase {
         m_swerveModule3.setDesiredState(swerveModuleStates[2]);
         m_swerveModule4.setDesiredState(swerveModuleStates[3]);
     }
+
+        // ---------------------- NEW CHANGES ------------------------
+
+    // Drive using simple percents in robot frame (forward and rotate), not field-relative
+    public void driveVisionPercent(double fwdPercent, double omegaPercent) {
+        double X = MathUtil.clamp(fwdPercent, -1.0, 1.0) * SwerveConstants.kDriveMaxSpeed;
+        double O = MathUtil.clamp(omegaPercent, -1.0, 1.0) * SwerveConstants.kTurnMaxSpeed;
+        setSwerveModuleStates(drive(X, 0.0, O, false, 0.02)); // false = robot-relative
+    }
+
+    // Returns true if the driver is moving the sticks past a custom deadband (harder than normal to avoid drift)
+    public boolean driverOverrideActive(double overrideDeadband) {
+        // Use the same suppliers you already set in RobotContainer
+        double x = MathUtil.applyDeadband(m_translationX.getAsDouble(), overrideDeadband);
+        double y = MathUtil.applyDeadband(m_translationY.getAsDouble(), overrideDeadband);
+        double o = MathUtil.applyDeadband(m_rotationOmega.getAsDouble(), overrideDeadband);
+        return (x != 0.0) || (y != 0.0) || (o != 0.0);
+}
+
+    // Stop all motion in the drivetrain
+    public void stop() {
+        setSwerveModuleStates(new ChassisSpeeds());
+    }
+
 }

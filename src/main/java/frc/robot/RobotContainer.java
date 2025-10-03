@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Intake;
+import frc.robot.commands.AutoTake; 
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,12 +17,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.drive.SwerveDrive;
+import frc.robot.vision.Limelight;
 
 public class RobotContainer {
 
 	// Controllers
 	public static final CommandXboxController m_driverController = new CommandXboxController(0);
 	public static final CommandPS5Controller m_operatorController = new CommandPS5Controller(1); // TODO: Change to Xbox if needed
+	private final Limelight m_ll = new Limelight("limelight"); // ll = Limelight
 	// public static final CommandXboxController m_operatorController = new CommandXboxController(1);
 
 	// Subsystems
@@ -37,8 +40,6 @@ public class RobotContainer {
 		m_autoChooser = AutoBuilder.buildAutoChooser();
 		SmartDashboard.putData("Auto Mode", m_autoChooser);
 	}
-
-	// If you read this
 
 	private void configureBindings() {
 		// Driver Controller
@@ -59,6 +60,10 @@ public class RobotContainer {
 				return -Math.round(Math.sin(Math.toRadians(pov)));
 			}
 		);
+
+		// Driver: Hold A if xbox to auto-approach coral using Limelight
+		m_driverController.a().whileTrue(new AutoTake(m_swerveSubsystem, m_intakeSubsystem, m_ll));
+
 
 		// -----------------------------
 		// Operator: Intake bindings

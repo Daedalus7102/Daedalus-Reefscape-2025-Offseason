@@ -18,6 +18,9 @@ import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
 
+    public boolean objIntaked = false;
+
+    // private final Sensor m_sensor = new Sensor(IntakeConstants.kSensorID, IntakeConstants.kSensorThreshold);
     private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorID, MotorType.kBrushless);
     private final SparkMax m_rollerMotor = new SparkMax(IntakeConstants.kRollerMotorID, MotorType.kBrushless);
 
@@ -52,9 +55,14 @@ public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
         rollerCfg.smartCurrentLimit(IntakeConstants.kRollerCurrentLimitA);
         rollerCfg.inverted(IntakeConstants.kRollerInverted);
         m_rollerMotor.configure(rollerCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        /* m_sensor()
+			.onTrue(objIntaked = true)
+			.onFalse(objIntaked = false); */
     }
 
     // -------- Low-level controls --------
+
     public void setPivotPercent(double percent) {
         m_pivotMotor.set(percent);
     }
@@ -71,6 +79,13 @@ public class Intake extends edu.wpi.first.wpilibj2.command.SubsystemBase {
 
     public void stopAll() {
         m_pivotMotor.stopMotor();
+        m_rollerMotor.stopMotor();
+    }
+
+    public void stopPivot() {
+        m_pivotMotor.stopMotor();
+    }
+    public void stopRoller() {
         m_rollerMotor.stopMotor();
     }
 
